@@ -1,9 +1,7 @@
 import allure
-import requests
-
 from courier_methods import CourierMethods
-from data import *
 from order_methods import OrderMethods
+
 
 @allure.feature("Получение списка заказов GET '/api/v1/orders'")
 class TestOrderList:
