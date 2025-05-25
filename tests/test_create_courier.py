@@ -35,8 +35,8 @@ class TestCreateCourier:
 
     @allure.title("Проверка создания курьера с разной длиной логина: 2,3,6,9(201) vs 1,11,12,30(400)")
     @pytest.mark.parametrize("login_length, expected_status",
-                             [(2, 201),(3, 201), (6, 201), (9, 201),  # Valid cases
-                              (1, 400), (11, 400), (12, 400), (30, 400)])  # Invalid cases
+                             [(2, 201),(3, 201), (6, 201), (9, 201),
+                              (1, 400), (11, 400), (12, 400), (30, 400)])
     def test_login_length_boundary_values(self, login_length, expected_status):
 
         with allure.step(f"Проверка длины логина {login_length}. Ожидаем {expected_status}"):
@@ -60,7 +60,7 @@ class TestCreateCourier:
             )
 
             if response.status_code == 201:
-                CourierMethods.validate_success_creation(response, payload["login"], payload["password"])
+                CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
             else:
                 CourierMethods.validate_error_response(response, 400)
 
@@ -127,7 +127,7 @@ class TestCreateCourier:
             )
 
             if response.status_code == 201:
-                CourierMethods.validate_success_creation(response, payload["login"], payload["password"])
+                CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
             else:
                 CourierMethods.validate_error_response(response, 400)
 
@@ -137,8 +137,8 @@ class TestCreateCourier:
         ("-12345", "Отрицательное число как пароль"),
         ("sec#ret", "Символ решетки"),
         ("$$admin$$", "Символы доллара"),
-        (12345, "Числовое значение"),
-        (-999, "Отрицательное число"),
+        (1234, "Числовое значение"),
+        (-9999, "Отрицательное число"),
         ("   ", "Пробелы вместо пароля"),
         ("apj", "Пароль из 3 символов"),
         ("acdfg", "Пароль из 5 символов"),
@@ -167,6 +167,6 @@ class TestCreateCourier:
                 )
 
                 if response.status_code == 201:
-                    CourierMethods.validate_success_creation(response, payload["login"], payload["password"])
+                    CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
                 else:
                     CourierMethods.validate_error_response(response, 400)

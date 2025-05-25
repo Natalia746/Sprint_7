@@ -8,7 +8,7 @@ from courier_methods import CourierMethods
 @allure.feature("Авторизация курьера /api/v1/courier/login")
 class TestAuthorization:
 
-    @allure.title("Проверка успешной авторизации ранее зарегистрированного курьера с возвращением id")
+    @allure.title("Проверка успешной авторизации ранее зарегистрированного курьера с возвращением id в теле ответа")
     def test_success_authorization_registered_courier(self):
 
         login = DataForAuth.PAYLOAD["login"]

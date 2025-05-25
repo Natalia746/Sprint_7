@@ -52,7 +52,7 @@ class CourierMethods:
 
     @staticmethod
     @allure.step("Проверка успешного создания курьера и удаление тестовых данных")
-    def validate_success_creation(response, login, password):
+    def validate_success_creation_and_delete_data(response, login, password):
         response_body = response.json()
         assert response.status_code == 201, f"Ожидался статус 201, получен {response.status_code}"
         assert "ok" in response_body and response_body["ok"] is True, "Некорректное тело успешного ответа"
