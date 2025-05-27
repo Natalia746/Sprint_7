@@ -1,4 +1,5 @@
 import allure
+import pytest
 import requests
 from data import Url
 from generators import *
@@ -67,4 +68,31 @@ class CourierMethods:
         response_body = response.json()
         assert response.status_code == expected_status, f"Ожидался статус {expected_status}, получен {response.status_code}"
         assert "message" in response_body, "Отсутствует сообщение об ошибке"
+
+    @staticmethod
+    @allure.step("Универсальная валидация ответа")
+    def validate_creation_response(response, expected_status, login=None, password=None):
+        if response.status_code == 409:
+            pytest.fail(f"Конфликт логина: {login}. Генерация: {login}")
+
+        assert response.status_code == expected_status, (
+            f"Ожидался {expected_status}, получен {response.status_code}"
+        )
+
+        if expected_status == 201:
+            CourierMethods.validate_success_creation_and_delete_data(response, login, password)
+
+        else:
+            CourierMethods._validate_error(response)
+
+
+
+
+
+    @staticmethod
+    def _validate_error(response):
+        """Валидация ошибок"""
+        assert "message" in response.json(), "Сообщение об ошибке отсутствует"
+        if response.status_code == 400:
+            assert "Недостаточно данных" in response.json()["message"]
 

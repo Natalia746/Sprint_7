@@ -1,3 +1,4 @@
+import uuid
 
 import pytest
 from courier_methods import *
@@ -34,15 +35,21 @@ class TestCreateCourier:
                                                                                   ""), "Некорректное сообщение"
 
     @allure.title("Проверка создания курьера с разной длиной логина: 2,3,6,9(201) vs 1,11,12,30(400)")
-    @pytest.mark.parametrize("login_length, expected_status",
-                             [(2, 201),(3, 201), (6, 201), (9, 201),
-                              (1, 400), (11, 400), (12, 400), (30, 400)])
-    def test_login_length_boundary_values(self, login_length, expected_status):
-
+    @pytest.mark.parametrize("login_length, expected_status, test_type", [
+        (2, 201, "valid"),
+        (3, 201, "valid"),
+        (6, 201, "valid"),
+        (9, 201, "valid"),
+        (1, 400, "invalid"),
+        (11, 400, "invalid"),
+        (12, 400, "invalid"),
+        (30, 400, "invalid")
+    ])
+    def test_login_length_boundary_values(self, login_length, expected_status, test_type):
         with allure.step(f"Проверка длины логина {login_length}. Ожидаем {expected_status}"):
-            # Генерируем уникальный логин с временной меткой
+            # Генерация уникального логина с учетом типа теста
             base_login = generate_random_string(login_length)
-            unique_login = f"{base_login}_{int(time.time() * 1000)}"
+            unique_login = f"{base_login}_{uuid.uuid4().hex[:8]}_{int(time.time())}"
 
             payload = {
                 "login": unique_login,
@@ -52,17 +59,13 @@ class TestCreateCourier:
 
             response = CourierMethods.create_courier(payload)
 
-            if response.status_code == 409:
-                pytest.skip(f"Логин {unique_login} уже существует. Требуется пересмотреть генерацию логинов.")
-
-            assert response.status_code == expected_status, (
-                f"Неверный статус код. Ожидалось {expected_status}, получено {response.status_code}"
+            # Универсальная валидация ответа
+            CourierMethods.validate_creation_response(
+                response=response,
+                expected_status=expected_status,
+                login=payload["login"],
+                password=payload["password"]
             )
-
-            if response.status_code == 201:
-                CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
-            else:
-                CourierMethods.validate_error_response(response, 400)
 
     @allure.title("Проверка обязательности полей login и password при создании курьера")
     @pytest.mark.parametrize("missing_field, test_description", [
