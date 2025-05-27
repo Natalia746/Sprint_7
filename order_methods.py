@@ -61,3 +61,4 @@ class OrderMethods:
     @allure.step("Отмена созданного заказа")
     def cancel_order(track):
         return requests.put(f"{Url.BASE_URL}{Url.CANCEL_ORDER}")
+

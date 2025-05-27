@@ -68,37 +68,33 @@ class TestCreateCourier:
             )
 
     @allure.title("Проверка обязательности полей login и password при создании курьера")
-    @pytest.mark.parametrize("missing_field, test_description", [
-        ("login", "Создание курьера без логина"),
-        ("password", "Создание курьера без пароля"),
-        ("both", "Создание курьера без логина и пароля")
+    @pytest.mark.parametrize("missing_fields, test_description", [
+        ({"login"}, "Создание курьера без логина"),
+        ({"password"}, "Создание курьера без пароля"),
+        ({"login", "password"}, "Создание курьера без логина и пароля")
     ])
-    def test_missing_required_fields(self, missing_field, test_description):
-        with allure.step(test_description):
-
-            payload = {
+    def test_missing_required_fields(self, missing_fields, test_description):
+        with allure.step("Генерация всех данных"):
+            full_payload = {
                 "login": generate_random_string(10),
                 "password": generate_random_string(10),
                 "firstName": generate_random_string(10)
             }
 
-            if missing_field == "login":
-                del payload["login"]
-            elif missing_field == "password":
-                del payload["password"]
-            else:
-                del payload["login"]
-                del payload["password"]
+            # Удаление указанных полей
+            test_payload = {k: v for k, v in full_payload.items() if k not in missing_fields}
 
-            response = CourierMethods.create_courier(payload)
+            response = CourierMethods.create_courier(test_payload)
 
+            # Проверки
             assert response.status_code == 400, (
                 f"Ожидался 400, получен {response.status_code}"
             )
 
             response_body = response.json()
-            assert response_body["message"] == "Недостаточно данных для создания учетной записи", (
-                f"Некорректное сообщение об ошибке: {response_body.get('message')}"
+            expected_message = "Недостаточно данных для создания учетной записи"
+            assert response_body["message"] == expected_message, (
+                f"Некорректное сообщение: {response_body.get('message')}"
             )
 
             assert "ok" not in response_body, "Ответ содержит неожиданное поле 'ok'"
@@ -125,14 +121,13 @@ class TestCreateCourier:
             }
 
             response = CourierMethods.create_courier(payload)
-            assert response.status_code == 400, (
+            assert  response.status_code == 400,(
                 f"Ожидалось 400, получено {response.status_code}. Ответ: {response.text}"
             )
+            if 400 != response.status_code :
+                CourierMethods.validate_creation_response(response, login=None, password=None)
 
-            if response.status_code == 201:
-                CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
-            else:
-                CourierMethods.validate_error_response(response, 400)
+
 
     @allure.title("Проверка невалидных значений в пароле: спецсимволы, числа и граничные случаи")
     @pytest.mark.parametrize("password_value, test_description", [
@@ -169,7 +164,8 @@ class TestCreateCourier:
                     f"Ожидалось 400, получено {response.status_code}. Ответ: {response.text}"
                 )
 
-                if response.status_code == 201:
-                    CourierMethods.validate_success_creation_and_delete_data(response, payload["login"], payload["password"])
-                else:
-                    CourierMethods.validate_error_response(response, 400)
+                assert response.status_code == 400, (
+                    f"Ожидалось 400, получено {response.status_code}. Ответ: {response.text}"
+                )
+                if 400 != response.status_code:
+                    CourierMethods.validate_creation_response(response, login, processed_password)
