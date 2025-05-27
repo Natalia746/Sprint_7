@@ -41,12 +41,6 @@ def created_order():
     OrderMethods.cancel_order(track)
 
 
-class OrderMethod:
-    @classmethod
-    def create_order(cls, order_data):
-        pass
-
-
 @pytest.fixture
 @allure.title("Создание и отмена заказа")
 def create_and_cancel_order():
@@ -55,19 +49,14 @@ def create_and_cancel_order():
     def _create_order(order_payload):
         response = OrderMethods.create_order(order_payload)
         OrderMethods.validate_order_creation(response)
-
         track = response.json()["track"]
         tracks.append(track)
         return track
 
     yield _create_order
 
-    # Отмена всех созданных заказов после теста
     with allure.step("Отмена созданных заказов"):
         for track in tracks:
             OrderMethods.cancel_order(track)
 
 
-@pytest.fixture
-def order_data():
-    return DataForOrder.ORDER_DATA.copy()

@@ -22,14 +22,15 @@ class DataForAuth:
 
 class DataForOrder:
     ORDER_DATA = {
-        "firstName": "Serg",
+        "firstName": "Sergynia",
         "lastName": "Uchiha",
         "address": "Ugizy, 142 apt.",
         "metroStation": 8,
-        "phone": "+7 800 355 35 35",
+        "phone": "78003553535",
         "rentTime": 2,
         "deliveryDate": datetime.now().strftime("%Y-%m-%d"),
         "comment": "Jmn bkdk"
     }
+
 
 
