@@ -1,6 +1,4 @@
 import uuid
-
-import pytest
 from courier_methods import *
 from generators import generate_unique_login
 
@@ -16,7 +14,7 @@ class TestCreateCourier:
         assert response.status_code == 200, "Ошибка авторизации"
         assert "id" in response.json(), "Поле 'id' отсутствует в ответе"
 
-    @allure.title("Попытка дублирования курьера: проверка сообщения 'Этот логин уже используется'")
+    @allure.title("Попытка дублирования курьера при создании: проверка сообщения 'Этот логин уже используется'")
     def test_create_duplicate_courier(self, registered_courier):
 
         login, password, first_name = registered_courier
@@ -160,12 +158,9 @@ class TestCreateCourier:
                 }
 
                 response = CourierMethods.create_courier(payload)
-                assert response.status_code == 400, (
-                    f"Ожидалось 400, получено {response.status_code}. Ответ: {response.text}"
+                CourierMethods.validate_creation_response(
+                    response=response,
+                    expected_status=400,
+                    login=login,
+                    password=processed_password
                 )
-
-                assert response.status_code == 400, (
-                    f"Ожидалось 400, получено {response.status_code}. Ответ: {response.text}"
-                )
-                if 400 != response.status_code:
-                    CourierMethods.validate_creation_response(response, login, processed_password)
